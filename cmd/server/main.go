@@ -54,6 +54,9 @@ func main() {
 			pubsub.PublishJSON(ch, exchange, key, val)
 			fmt.Printf("Published message to exchange %s with key %s: %+v\n", exchange, key, val)
 
+		case "help":
+			gamelogic.PrintServerHelp()
+
 		case "quit":
 			fmt.Println("Quitting...")
 			return

@@ -38,17 +38,42 @@ func main() {
 
 	pubsub.DeclareAndBind(conn, routing.ExchangePerilDirect, routing.PauseKey+"."+usr, routing.PauseKey, pubsub.Transient)
 
-	_ = gamelogic.NewGameState(usr)
+	state := gamelogic.NewGameState(usr)
 
 	for {
 		input := gamelogic.GetInput()
 		if len(input) == 0 {
 			continue
 		}
-		if input[0] == "move" {
-			continue
+		switch input[0] {
+		case "spawn":
+			err = state.CommandSpawn(input)
+			if err != nil {
+				fmt.Printf("Error spawning: %s\n", err)
+				continue
+			}
+
+		case "move":
+			_, err := state.CommandMove(input)
+			if err != nil {
+				fmt.Printf("Error moving: %s\n", err)
+				continue
+			}
+
+		case "status":
+			state.CommandStatus()
+
+		case "spam":
+			fmt.Println("Spamming not allowed yet.")
+
+		case "help":
+			gamelogic.PrintClientHelp()
+		case "quit":
+			fmt.Println("Quitting...")
+			return
+		default:
+			fmt.Println("Unknown command. Type 'help' for a list of commands.")
 		}
-		
 	}
 
 	// wait for ctrl+c
