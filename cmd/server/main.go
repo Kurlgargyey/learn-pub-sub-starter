@@ -3,8 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	os "os"
-	"os/signal"
 
 	"github.com/bootdotdev/learn-pub-sub-starter/internal/gamelogic"
 	"github.com/bootdotdev/learn-pub-sub-starter/internal/pubsub"
@@ -31,24 +29,36 @@ func main() {
 	fmt.Println("Channel opened")
 	gamelogic.PrintServerHelp()
 
-	for {
-		input := gamelogic.GetInput()
-
-	}
-
 	exchange := routing.ExchangePerilDirect
 	key := routing.PauseKey
-	val := routing.PlayingState{
-		IsPaused: true,
+
+	for {
+		input := gamelogic.GetInput()
+		if len(input) == 0 {
+			continue
+		}
+		switch input[0] {
+		case "pause":
+			val := routing.PlayingState{
+					IsPaused: true,
+				}
+
+			pubsub.PublishJSON(ch, exchange, key, val)
+			fmt.Printf("Published message to exchange %s with key %s: %+v\n", exchange, key, val)
+
+		case "resume":
+			val := routing.PlayingState{
+					IsPaused: false,
+				}
+
+			pubsub.PublishJSON(ch, exchange, key, val)
+			fmt.Printf("Published message to exchange %s with key %s: %+v\n", exchange, key, val)
+
+		case "quit":
+			fmt.Println("Quitting...")
+			return
+
+		default: fmt.Println("Invalid command. Type 'help' for a list of commands.")
+		}
 	}
-
-	pubsub.PublishJSON(ch, exchange, key, val)
-	fmt.Printf("Published message to exchange %s with key %s: %+v\n", exchange, key, val)
-	// wait for the message to be sent
-
-	// wait for ctrl+c
-	signalChan := make(chan os.Signal, 1)
-	signal.Notify(signalChan, os.Interrupt)
-	<-signalChan
-	fmt.Println("Shutting down...")
 }
