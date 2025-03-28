@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/bootdotdev/learn-pub-sub-starter/internal/gamelogic"
+	"github.com/bootdotdev/learn-pub-sub-starter/internal/pubsub"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
@@ -22,9 +23,19 @@ func client_repl(ch *amqp.Channel, exchange, key string, state *gamelogic.GameSt
 			}
 
 		case "move":
-			_, err := state.CommandMove(input)
+			mov, err := state.CommandMove(input)
 			if err != nil {
 				fmt.Printf("Error moving: %s\n", err)
+				continue
+			}
+			err = pubsub.PublishJSON(
+				ch,
+				"peril_topic",
+				"army_moves."+state.GetUsername(),
+				mov,
+			)
+			if err != nil {
+				fmt.Printf("Error publishing move: %s\n", err)
 				continue
 			}
 

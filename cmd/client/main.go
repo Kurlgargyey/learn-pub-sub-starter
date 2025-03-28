@@ -27,9 +27,13 @@ func main() {
 		return
 	}
 
-	// pubsub.DeclareAndBind(conn, routing.ExchangePerilDirect, routing.PauseKey+"."+usr, routing.PauseKey, pubsub.Transient)
+	if err != nil {
+		log.Fatalf("Failed to declare and bind: %s\n", err)
+		return
+	}
 
 	state := gamelogic.NewGameState(usr)
+	_, err = pubsub.SubscribeJSON(conn, "peril_topic", "army_moves."+usr, "army_moves.*", pubsub.Transient, handlerMove(state))
 	ch, err := pubsub.SubscribeJSON(conn, routing.ExchangePerilDirect, routing.PauseKey+"."+usr, routing.PauseKey, pubsub.Transient, handlerPause(state))
 	if err != nil {
 		log.Fatalf("Failed to subscribe to pause: %s\n", err)
