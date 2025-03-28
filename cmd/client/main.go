@@ -27,11 +27,6 @@ func main() {
 		return
 	}
 
-	if err != nil {
-		log.Fatalf("Failed to declare and bind: %s\n", err)
-		return
-	}
-
 	state := gamelogic.NewGameState(usr)
 	_, err = pubsub.SubscribeJSON(conn, "peril_topic", "army_moves."+usr, "army_moves.*", pubsub.Transient, handlerMove(state))
 	if err != nil {
