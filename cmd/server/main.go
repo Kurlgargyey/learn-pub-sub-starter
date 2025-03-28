@@ -2,10 +2,13 @@ package main
 
 import (
 	"fmt"
-	amqp "github.com/rabbitmq/amqp091-go"
+	"log"
 	os "os"
 	"os/signal"
-	"log"
+
+	"github.com/bootdotdev/learn-pub-sub-starter/internal/pubsub"
+	"github.com/bootdotdev/learn-pub-sub-starter/internal/routing"
+	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 func main() {
@@ -18,6 +21,23 @@ func main() {
 	}
 	defer conn.Close()
 	fmt.Println("Connected to RabbitMQ")
+	ch, err := conn.Channel()
+	if err != nil {
+		log.Fatalf("Failed to open a channel: %s\n", err)
+		return
+	}
+	defer ch.Close()
+	fmt.Println("Channel opened")
+
+	exchange := routing.ExchangePerilDirect
+	key := routing.PauseKey
+	val := routing.PlayingState{
+		IsPaused: true,
+	}
+
+	pubsub.PublishJSON(ch, exchange, key, val)
+	fmt.Printf("Published message to exchange %s with key %s: %+v\n", exchange, key, val)
+	// wait for the message to be sent
 
 	// wait for ctrl+c
 	signalChan := make(chan os.Signal, 1)
