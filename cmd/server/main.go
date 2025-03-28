@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/bootdotdev/learn-pub-sub-starter/internal/gamelogic"
+	"github.com/bootdotdev/learn-pub-sub-starter/internal/pubsub"
 	"github.com/bootdotdev/learn-pub-sub-starter/internal/routing"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
@@ -30,6 +31,8 @@ func main() {
 
 	exchange := routing.ExchangePerilDirect
 	key := routing.PauseKey
+
+	pubsub.DeclareAndBind(conn, "peril_topic", "game_logs","game_logs.*", pubsub.Durable)
 
 	server_repl(ch, exchange, key)
 }

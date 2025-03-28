@@ -37,6 +37,11 @@ func main() {
 	pubsub.DeclareAndBind(conn, routing.ExchangePerilDirect, routing.PauseKey+"."+usr, routing.PauseKey, pubsub.Transient)
 
 	state := gamelogic.NewGameState(usr)
+	err = pubsub.SubscribeJSON(conn, routing.ExchangePerilDirect, "pause."+usr, routing.PauseKey, pubsub.Transient, handlerPause(state))
+	if err != nil {
+		log.Fatalf("Failed to subscribe to pause: %s\n", err)
+		return
+	}
 
 	client_repl(ch, routing.ExchangePerilDirect, routing.PauseKey+"."+usr, state)
 }
