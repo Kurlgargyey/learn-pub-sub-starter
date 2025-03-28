@@ -32,17 +32,19 @@ func SubscribeJSON[T any](
     key string,
     simpleQueueType int, // an enum to represent "durable" or "transient"
     handler func(T),
-) error {
-	DeclareAndBind(conn, exchange, queueName, key, simpleQueueType)
-	ch, err := conn.Channel()
+) (*amqp.Channel, error) {
+	ch, _, err := DeclareAndBind(conn, exchange, queueName, key, simpleQueueType)
+
 	if err != nil {
-		return fmt.Errorf("failed to open channel: %w", err)
+		return nil, fmt.Errorf("failed to declare and bind queue: %w", err)
 	}
-	defer ch.Close()
 	cons, err := ch.Consume(
 		queueName,
 		"",false,false,false,false,nil,
 		)
+	if err != nil {
+		return nil, fmt.Errorf("failed to consume messages: %w", err)
+	}
 	go func() {
 		for msg := range cons {
 			var val T
@@ -56,5 +58,5 @@ func SubscribeJSON[T any](
 			}
 		}
 	}()
-	return nil
+	return ch, nil
 	}
