@@ -6,6 +6,7 @@ import (
 	os "os"
 	"os/signal"
 
+	"github.com/bootdotdev/learn-pub-sub-starter/internal/gamelogic"
 	"github.com/bootdotdev/learn-pub-sub-starter/internal/pubsub"
 	"github.com/bootdotdev/learn-pub-sub-starter/internal/routing"
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -28,6 +29,12 @@ func main() {
 	}
 	defer ch.Close()
 	fmt.Println("Channel opened")
+	gamelogic.PrintServerHelp()
+
+	for {
+		input := gamelogic.GetInput()
+
+	}
 
 	exchange := routing.ExchangePerilDirect
 	key := routing.PauseKey
