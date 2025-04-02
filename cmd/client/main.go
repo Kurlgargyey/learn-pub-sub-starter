@@ -21,6 +21,14 @@ func main() {
 	defer conn.Close()
 	fmt.Println("Connected to RabbitMQ")
 
+	ch, err := conn.Channel()
+	if err != nil {
+		log.Fatalf("Failed to open a channel: %s\n", err)
+		return
+	}
+	defer ch.Close()
+	fmt.Println("Channel opened")
+
 	usr, err := gamelogic.ClientWelcome()
 	if err != nil {
 		log.Fatalf("Failed to get user: %s\n", err)
@@ -28,12 +36,12 @@ func main() {
 	}
 
 	state := gamelogic.NewGameState(usr)
-	_, err = pubsub.SubscribeJSON(conn, "peril_topic", "army_moves."+usr, "army_moves.*", pubsub.Transient, handlerMove(state))
+	err = pubsub.SubscribeJSON(ch, "peril_topic", "army_moves."+usr, "army_moves.*", pubsub.Transient, handlerMove(ch, state))
 	if err != nil {
 		log.Fatalf("Failed to subscribe to moves: %s\n", err)
 		return
 	}
-	ch, err := pubsub.SubscribeJSON(conn, routing.ExchangePerilDirect, routing.PauseKey+"."+usr, routing.PauseKey, pubsub.Transient, handlerPause(state))
+	err = pubsub.SubscribeJSON(ch, routing.ExchangePerilDirect, routing.PauseKey+"."+usr, routing.PauseKey, pubsub.Transient, handlerPause(state))
 	if err != nil {
 		log.Fatalf("Failed to subscribe to pause: %s\n", err)
 		return

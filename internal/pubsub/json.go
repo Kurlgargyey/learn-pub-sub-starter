@@ -32,24 +32,24 @@ func PublishJSON[T any](ch *amqp.Channel, exchange, key string, val T) error {
 }
 
 func SubscribeJSON[T any](
-    conn *amqp.Connection,
+    ch *amqp.Channel,
     exchange,
     queueName,
     key string,
     simpleQueueType int, // an enum to represent "durable" or "transient"
     handler func(T) AckType,
-) (*amqp.Channel, error) {
-	ch, _, err := DeclareAndBind(conn, exchange, queueName, key, simpleQueueType)
+) (error) {
+	_,err := DeclareAndBind(ch, exchange, queueName, key, simpleQueueType)
 
 	if err != nil {
-		return nil, fmt.Errorf("failed to declare and bind queue: %w", err)
+		return fmt.Errorf("failed to declare and bind queue: %w", err)
 	}
 	cons, err := ch.Consume(
 		queueName,
 		"",false,false,false,false,nil,
 		)
 	if err != nil {
-		return nil, fmt.Errorf("failed to consume messages: %w", err)
+		return fmt.Errorf("failed to consume messages: %w", err)
 	}
 	go func() {
 		for msg := range cons {
@@ -59,7 +59,6 @@ func SubscribeJSON[T any](
 				continue
 			}
 			ack := handler(val)
-			fmt.Println("AckType:", ack)
 			switch ack {
 			case NackRequeue:
 				err = msg.Nack(false, true)
@@ -73,5 +72,5 @@ func SubscribeJSON[T any](
 			}
 		}
 	}()
-	return ch, nil
+	return nil
 	}

@@ -6,6 +6,7 @@ import (
 	"github.com/bootdotdev/learn-pub-sub-starter/internal/gamelogic"
 	"github.com/bootdotdev/learn-pub-sub-starter/internal/pubsub"
 	"github.com/bootdotdev/learn-pub-sub-starter/internal/routing"
+	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 func handlerPause(gs *gamelogic.GameState) func(routing.PlayingState) pubsub.AckType {
@@ -16,7 +17,7 @@ func handlerPause(gs *gamelogic.GameState) func(routing.PlayingState) pubsub.Ack
 	}
 }
 
-func handlerMove(gs *gamelogic.GameState) func(gamelogic.ArmyMove) pubsub.AckType{
+func handlerMove(ch *amqp.Channel, gs *gamelogic.GameState) func(gamelogic.ArmyMove) pubsub.AckType{
 	return func(mov gamelogic.ArmyMove) pubsub.AckType {
 		defer fmt.Print("> ")
 		oc := gs.HandleMove(mov)
@@ -24,7 +25,11 @@ func handlerMove(gs *gamelogic.GameState) func(gamelogic.ArmyMove) pubsub.AckTyp
 		case gamelogic.MoveOutComeSafe:
 			return pubsub.Ack
 		case gamelogic.MoveOutcomeMakeWar:
-			return pubsub.Ack
+			pubsub.PublishJSON(
+				ch,
+				"peril_topic",
+				routing.WarRecognitionsPrefix+"."+gs.GetUsername(),mov)
+			return pubsub.NackRequeue
 		default:
 			return pubsub.NackDiscard
 		}

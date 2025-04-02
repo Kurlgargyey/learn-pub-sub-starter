@@ -32,7 +32,7 @@ func main() {
 	exchange := routing.ExchangePerilDirect
 	key := routing.PauseKey
 
-	pubsub.DeclareAndBind(conn, "peril_topic", "game_logs","game_logs.*", pubsub.Durable)
+	pubsub.DeclareAndBind(ch, "peril_topic", "game_logs","game_logs.*", pubsub.Durable)
 
 	server_repl(ch, exchange, key)
 }

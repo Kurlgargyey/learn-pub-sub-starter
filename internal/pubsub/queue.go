@@ -13,13 +13,8 @@ const (
 	Transient
 )
 
-func DeclareAndBind(conn *amqp.Connection, exchange, queueName, key string, simpleQueueType int,
-) (*amqp.Channel, amqp.Queue, error) {
-	// Create a channel
-	ch, err := conn.Channel()
-	if err != nil {
-		return nil, amqp.Queue{}, fmt.Errorf("failed to open a channel: %w", err)
-	}
+func DeclareAndBind(ch *amqp.Channel, exchange, queueName, key string, simpleQueueType int,
+) (amqp.Queue, error) {
 	// Declare the queue
 	q, err := ch.QueueDeclare(
 		queueName,
@@ -27,10 +22,12 @@ func DeclareAndBind(conn *amqp.Connection, exchange, queueName, key string, simp
 		simpleQueueType == Transient, // delete when unused
 		simpleQueueType == Transient,
 		false, // no-wait
-		nil,   // arguments
+		amqp.Table{
+			"x-dead-letter-exchange": "peril_dlx",
+		},   // arguments
 	)
 	if err != nil {
-		return nil, amqp.Queue{}, fmt.Errorf("failed to declare a queue: %w", err)
+		return amqp.Queue{}, fmt.Errorf("failed to declare a queue: %w", err)
 	}
 	// Bind the queue to the exchange
 	err = ch.QueueBind(
@@ -41,7 +38,7 @@ func DeclareAndBind(conn *amqp.Connection, exchange, queueName, key string, simp
 		nil,
 	)
 	if err != nil {
-		return nil, amqp.Queue{}, fmt.Errorf("failed to bind the queue: %w", err)
+		return amqp.Queue{}, fmt.Errorf("failed to bind the queue: %w", err)
 	}
-	return ch, q, nil
+	return q, nil
 }
