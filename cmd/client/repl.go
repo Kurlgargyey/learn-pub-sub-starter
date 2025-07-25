@@ -5,10 +5,11 @@ import (
 
 	"github.com/bootdotdev/learn-pub-sub-starter/internal/gamelogic"
 	"github.com/bootdotdev/learn-pub-sub-starter/internal/pubsub"
+	"github.com/bootdotdev/learn-pub-sub-starter/internal/routing"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-func client_repl(ch *amqp.Channel, exchange, key string, state *gamelogic.GameState) {
+func client_repl(ch *amqp.Channel, state *gamelogic.GameState) {
 	for {
 		input := gamelogic.GetInput()
 		if len(input) == 0 {
@@ -30,7 +31,7 @@ func client_repl(ch *amqp.Channel, exchange, key string, state *gamelogic.GameSt
 			}
 			err = pubsub.PublishJSON(
 				ch,
-				"peril_topic",
+				routing.ExchangePerilTopic,
 				"army_moves."+state.GetUsername(),
 				mov,
 			)

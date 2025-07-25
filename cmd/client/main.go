@@ -36,7 +36,7 @@ func main() {
 	}
 
 	state := gamelogic.NewGameState(usr)
-	err = pubsub.SubscribeJSON(ch, "peril_topic", "army_moves."+usr, "army_moves.*", pubsub.Transient, handlerMove(ch, state))
+	err = pubsub.SubscribeJSON(ch, routing.ExchangePerilTopic, "army_moves."+usr, "army_moves.*", pubsub.Transient, handlerMove(ch, state))
 	if err != nil {
 		log.Fatalf("Failed to subscribe to moves: %s\n", err)
 		return
@@ -46,7 +46,10 @@ func main() {
 		log.Fatalf("Failed to subscribe to pause: %s\n", err)
 		return
 	}
+
+	err = pubsub.SubscribeJSON(ch, routing.ExchangePerilDirect, "war", routing.WarRecognitionsPrefix+"."+usr, pubsub.Durable, handlerWar(state))
+
 	defer ch.Close()
 
-	client_repl(ch, routing.ExchangePerilDirect, routing.PauseKey+"."+usr, state)
+	client_repl(ch, state)
 }

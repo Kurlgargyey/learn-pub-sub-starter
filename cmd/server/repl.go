@@ -18,16 +18,16 @@ func server_repl(ch *amqp.Channel, exchange, key string) {
 		switch input[0] {
 		case "pause":
 			val := routing.PlayingState{
-					IsPaused: true,
-				}
+				IsPaused: true,
+			}
 
 			pubsub.PublishJSON(ch, exchange, key, val)
 			fmt.Printf("Published message to exchange %s with key %s: %+v\n", exchange, key, val)
 
 		case "resume":
 			val := routing.PlayingState{
-					IsPaused: false,
-				}
+				IsPaused: false,
+			}
 
 			pubsub.PublishJSON(ch, exchange, key, val)
 			fmt.Printf("Published message to exchange %s with key %s: %+v\n", exchange, key, val)
@@ -39,7 +39,8 @@ func server_repl(ch *amqp.Channel, exchange, key string) {
 			fmt.Println("Quitting...")
 			return
 
-		default: fmt.Println("Invalid command. Type 'help' for a list of commands.")
+		default:
+			fmt.Println("Invalid command. Type 'help' for a list of commands.")
 		}
 	}
 }

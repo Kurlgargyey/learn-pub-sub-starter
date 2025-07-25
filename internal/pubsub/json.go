@@ -9,11 +9,13 @@ import (
 )
 
 type AckType int
+
 const (
 	Ack AckType = iota
 	NackRequeue
 	NackDiscard
 )
+
 func PublishJSON[T any](ch *amqp.Channel, exchange, key string, val T) error {
 	body, err := json.Marshal(val)
 	if err != nil {
@@ -32,22 +34,22 @@ func PublishJSON[T any](ch *amqp.Channel, exchange, key string, val T) error {
 }
 
 func SubscribeJSON[T any](
-    ch *amqp.Channel,
-    exchange,
-    queueName,
-    key string,
-    simpleQueueType int, // an enum to represent "durable" or "transient"
-    handler func(T) AckType,
-) (error) {
-	_,err := DeclareAndBind(ch, exchange, queueName, key, simpleQueueType)
+	ch *amqp.Channel,
+	exchange,
+	queueName,
+	key string,
+	simpleQueueType int, // an enum to represent "durable" or "transient"
+	handler func(T) AckType,
+) error {
+	_, err := DeclareAndBind(ch, exchange, queueName, key, simpleQueueType)
 
 	if err != nil {
 		return fmt.Errorf("failed to declare and bind queue: %w", err)
 	}
 	cons, err := ch.Consume(
 		queueName,
-		"",false,false,false,false,nil,
-		)
+		"", false, false, false, false, nil,
+	)
 	if err != nil {
 		return fmt.Errorf("failed to consume messages: %w", err)
 	}
@@ -73,4 +75,4 @@ func SubscribeJSON[T any](
 		}
 	}()
 	return nil
-	}
+}

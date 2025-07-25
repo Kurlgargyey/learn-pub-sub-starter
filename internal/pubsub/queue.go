@@ -24,7 +24,7 @@ func DeclareAndBind(ch *amqp.Channel, exchange, queueName, key string, simpleQue
 		false, // no-wait
 		amqp.Table{
 			"x-dead-letter-exchange": "peril_dlx",
-		},   // arguments
+		}, // arguments
 	)
 	if err != nil {
 		return amqp.Queue{}, fmt.Errorf("failed to declare a queue: %w", err)
