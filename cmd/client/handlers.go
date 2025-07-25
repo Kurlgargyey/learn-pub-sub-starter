@@ -10,7 +10,7 @@ import (
 )
 
 func PublishLog(ch *amqp.Channel, gs *gamelogic.GameState, msg string) error {
-	err := pubsub.PublishGob(ch, routing.ExchangePerilTopic, "GameLogSlug."+gs.GetUsername(), msg)
+	err := pubsub.PublishGob(ch, routing.ExchangePerilTopic, routing.GameLogSlug+"."+gs.GetUsername(), msg)
 	return err
 }
 
