@@ -55,7 +55,7 @@ func handlerWar(gs *gamelogic.GameState) func(gamelogic.RecognitionOfWar) pubsub
 		case gamelogic.WarOutcomeDraw:
 			return pubsub.Ack
 		default:
-			fmt.Errorf("Unknown war outcome: %v", oc)
+			fmt.Printf("Error: Unknown war outcome: %v\n", oc)
 			return pubsub.NackDiscard
 		}
 	}
