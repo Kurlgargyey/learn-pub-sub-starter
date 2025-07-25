@@ -16,34 +16,6 @@ func client_repl(ch *amqp.Channel, state *gamelogic.GameState) {
 			continue
 		}
 		switch input[0] {
-			case "pause":
-			pausedState := state
-			pausedState.Paused = true
-			err := pubsub.PublishJSON(
-				ch,
-				routing.ExchangePerilDirect,
-				routing.PauseKey+"."+state.GetUsername(),
-				pausedState,
-			)
-			if err != nil {
-				fmt.Printf("Error publishing pause command: %s\n", err)
-				continue
-			}
-			fmt.Println("Pause command sent.")
-		case "resume":
-			resumedState := state
-			resumedState.Paused = false
-			err := pubsub.PublishJSON(
-				ch,
-				routing.ExchangePerilDirect,
-				routing.PauseKey+"."+state.GetUsername(),
-				resumedState,
-			)
-			if err != nil {
-				fmt.Printf("Error publishing resume command: %s\n", err)
-				continue
-			}
-			fmt.Println("Resume command sent.")
 		case "spawn":
 			err := state.CommandSpawn(input)
 			if err != nil {
