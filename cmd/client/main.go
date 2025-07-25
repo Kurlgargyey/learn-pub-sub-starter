@@ -47,7 +47,7 @@ func main() {
 		return
 	}
 
-	err = pubsub.SubscribeJSON(ch, routing.ExchangePerilTopic, "war", routing.WarRecognitionsPrefix+".*", pubsub.Durable, handlerWar(state))
+	err = pubsub.SubscribeJSON(ch, routing.ExchangePerilTopic, "war", routing.WarRecognitionsPrefix+".*", pubsub.Durable, handlerWar(ch, state))
 	if err != nil {
 		log.Fatalf("Failed to subscribe to war recognitions: %s\n", err)
 		return
